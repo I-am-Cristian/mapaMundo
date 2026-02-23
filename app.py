@@ -28,10 +28,10 @@ def mapa():
     gdf.plot(ax=ax, color=gdf['color'], edgecolor='black', linewidth=0.5)
 
     # Nombres en el centroide
-    for _, row in gdf.iterrows():
-        centroid = row.geometry.centroid
-        ax.text(centroid.x, centroid.y, row['NOMBRE_DPT'],
-                fontsize=4.5, ha='center', va='center', color='#333')
+    # for _, row in gdf.iterrows():
+    #    centroid = row.geometry.centroid
+    #   ax.text(centroid.x, centroid.y, row['NOMBRE_DPT'],
+    #            fontsize=4.5, ha='center', va='center', color='#333')
 
     rojo_patch = mpatches.Patch(color='red', label='Seleccionados')
     gris_patch = mpatches.Patch(color='#CCCCCC', label='Otros')
