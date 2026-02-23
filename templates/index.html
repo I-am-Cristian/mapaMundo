@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa Colombia</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { display: flex; height: 100vh; font-family: sans-serif; background: #f0f0f0; }
+
+    .sidebar {
+      width: 260px; background: #1e1e2e; color: white;
+      display: flex; flex-direction: column; padding: 16px; gap: 6px;
+      overflow-y: auto;
+    }
+
+    h2 { font-size: 1rem; color: #ccc; border-bottom: 1px solid #333; 
+         padding-bottom: 8px; margin-bottom: 4px; }
+
+    .dept-btn {
+      width: 100%; padding: 8px 12px; background: #2a2a3e;
+      border: 1px solid #333; color: #ddd; text-align: left;
+      border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    .dept-btn:hover { background: #3a3a5e; }
+    .dept-btn.active { background: #e63946; border-color: #ff6b6b; 
+                       color: white; font-weight: bold; }
+
+    .actions { display: flex; gap: 8px; margin-bottom: 4px; }
+    .btn-sm {
+      flex: 1; padding: 7px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 0.78rem; font-weight: bold;
+    }
+    .btn-clear { background: #444; color: #ccc; }
+    .btn-all   { background: #e63946; color: white; }
+
+    .map-area {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      background: #e8f4f8; padding: 10px; position: relative;
+    }
+
+    #mapaImg {
+      max-height: 95vh; max-width: 100%;
+      border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: opacity 0.3s;
+    }
+
+    #loading {
+      display: none; position: absolute;
+      font-size: 1.2rem; color: #555; background: rgba(255,255,255,0.8);
+      padding: 12px 24px; border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>🇨🇴 Departamentos</h2>
+  <div class="actions">
+    <button class="btn-sm btn-clear" onclick="clearAll()">Limpiar</button>
+    <button class="btn-sm btn-all"   onclick="selectAll()">Todos</button>
+  </div>
+
+  {% for dept in departamentos %}
+  <button class="dept-btn" data-name="{{ dept }}" onclick="toggle(this)">
+    {{ dept }}
+  </button>
+  {% endfor %}
+</div>
+
+<div class="map-area">
+  <span id="loading">⏳ Generando mapa...</span>
+  <img id="mapaImg" src="/mapa" alt="Mapa Colombia">
+</div>
+
+<script>
+  const selected = new Set();
+
+  function toggle(btn) {
+    const name = btn.dataset.name;
+    if (selected.has(name)) {
+      selected.delete(name);
+      btn.classList.remove('active');
+    } else {
+      selected.add(name);
+      btn.classList.add('active');
+    }
+    updateMap();
+  }
+
+  function clearAll() {
+    selected.clear();
+    document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('active'));
+    updateMap();
+  }
+
+  function selectAll() {
+    document.querySelectorAll('.dept-btn').forEach(b => {
+      selected.add(b.dataset.name);
+      b.classList.add('active');
+    });
+    updateMap();
+  }
+
+  function updateMap() {
+    const params = [...selected].map(d => `dept=${encodeURIComponent(d)}`).join('&');
+    const url = '/mapa?' + params;
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('mapaImg').style.opacity = '0.3';
+
+    const tempImg = new Image();
+    tempImg.onload = function() {
+      document.getElementById('mapaImg').src = this.src;
+      document.getElementById('mapaImg').style.opacity = '1';
+      document.getElementById('loading').style.display = 'none';
+    };
+    tempImg.onerror = function() {
+      document.getElementById('loading').textContent = '❌ Error cargando mapa';
+    };
+    tempImg.src = url + '&t=' + Date.now(); // evita caché
+  }
+</script>
+
+</body>
+</html>

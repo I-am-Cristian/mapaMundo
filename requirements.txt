@@ -1,0 +1,6 @@
+flask
+geopandas
+matplotlib
+fiona
+shapely
+pyproj
